@@ -1,0 +1,23 @@
+# Secrets - never commit these
+config.json
+
+# Runtime data
+memory.json
+roles.json
+warnings.json
+warnings.json
+
+# Logs
+logs/
+
+# TTS temp files
+tts_*.mp3
+voice_*.mp3
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.env
+venv/
+.venv/
