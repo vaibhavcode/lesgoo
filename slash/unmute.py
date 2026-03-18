@@ -1,20 +1,18 @@
 import discord
 from discord import app_commands
 from utils.roles import is_mod
+from utils.errors import safe_send
 
 
 async def _unmute(interaction: discord.Interaction, user: discord.Member):
     if not is_mod(interaction.user):
-        await interaction.response.send_message("You don't have permission to unmute users.", ephemeral=True)
+        await safe_send(interaction, "You don't have permission to unmute users.", ephemeral=True)
         return
     try:
         await user.timeout(None)
-        embed = discord.Embed(title="User unmuted", color=discord.Color.green())
-        embed.add_field(name="User", value=user.mention, inline=True)
-        embed.add_field(name="Mod", value=interaction.user.mention, inline=True)
-        await interaction.response.send_message(embed=embed)
+        await safe_send(interaction, f"**{user.display_name}** unmuted.")
     except discord.Forbidden:
-        await interaction.response.send_message("I don't have permission to unmute that user.", ephemeral=True)
+        await safe_send(interaction, "I don't have permission to unmute that user.", ephemeral=True)
 
 
 def setup(bot, guild):

@@ -1,21 +1,23 @@
 import discord
 import asyncio
+from discord import app_commands
 from groq import Groq
 from utils.memory import get_user_memory
 from utils.config import config
-from discord import app_commands
+from utils.errors import safe_send
 
 groq_client = Groq(api_key=config["GROQ_API_KEY"])
 
 
 async def _roast(interaction: discord.Interaction, user: discord.Member):
     if user == interaction.client.user:
-        await interaction.response.send_message("Roast *myself*? I am flawless.", ephemeral=True)
+        await safe_send(interaction, "Roast *myself*? I am flawless. Try again.")
         return
     await interaction.response.defer()
     user_mem = get_user_memory(user.id)
     notes = "\n".join(user_mem["persona_notes"]) or "No notes."
     history = "\n".join(user_mem["history"][-6:]) or "No history."
+
     def _call():
         return groq_client.chat.completions.create(
             model="llama-3.3-70b-versatile", max_tokens=120,
@@ -24,6 +26,7 @@ async def _roast(interaction: discord.Interaction, user: discord.Member):
                 {"role": "user", "content": f"Roast {user.display_name}.\nTraits:\n{notes}\nMessages:\n{history}"}
             ]
         )
+
     try:
         completion = await asyncio.to_thread(_call)
         response = completion.choices[0].message.content.strip()

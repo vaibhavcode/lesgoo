@@ -5,13 +5,11 @@ from utils.errors import safe_send
 
 async def _shuffle(interaction: discord.Interaction):
     mq = get_queue(interaction.guild.id)
-
     if not mq.queue:
-        await safe_send(interaction, "The queue is empty — nothing to shuffle.", ephemeral=True)
+        await safe_send(interaction, "Nothing in the queue to shuffle.")
         return
-
     mq.shuffle()
-    await safe_send(interaction, f"Shuffled **{len(mq.queue)} tracks** in the queue.")
+    await safe_send(interaction, f"Shuffled **{len(mq.queue)} tracks**.")
 
 
 def setup(bot, guild):

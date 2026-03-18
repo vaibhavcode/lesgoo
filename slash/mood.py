@@ -1,5 +1,6 @@
 import discord
 import random
+from utils.errors import safe_send
 
 _mood: dict[int, str] = {}
 MOODS = ["annoyed", "dramatic", "suspicious", "flattered", "bored", "outraged"]
@@ -19,15 +20,12 @@ def get_mood(guild_id: int) -> str:
     return _mood[guild_id]
 
 
-async def _mood_cmd(interaction: discord.Interaction):
+async def _mood(interaction: discord.Interaction):
     current = get_mood(interaction.guild.id)
-    embed = discord.Embed(title="Aarshi's Current Mood", color=discord.Color.blurple())
-    embed.add_field(name="Mood", value=f"**{current.capitalize()}**", inline=True)
-    embed.add_field(name="Status", value=DESCRIPTIONS[current], inline=False)
-    await interaction.response.send_message(embed=embed)
+    await safe_send(interaction, f"I'm feeling **{current}**. {DESCRIPTIONS[current]}")
 
 
 def setup(bot, guild):
     @bot.tree.command(name="mood", description="Check Aarshi's current mood", guild=guild)
     async def slash_mood(interaction: discord.Interaction):
-        await _mood_cmd(interaction)
+        await _mood(interaction)

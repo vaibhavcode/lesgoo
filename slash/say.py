@@ -5,6 +5,7 @@ import time
 from discord import app_commands
 from elevenlabs.client import ElevenLabs
 from utils.config import config
+from utils.errors import safe_send, not_in_voice
 
 eleven = ElevenLabs(api_key=config["ELEVENLABS_API_KEY"])
 
@@ -12,15 +13,17 @@ eleven = ElevenLabs(api_key=config["ELEVENLABS_API_KEY"])
 async def _say(interaction: discord.Interaction, text: str):
     vc = interaction.guild.voice_client
     if vc is None or not vc.is_connected():
-        await interaction.response.send_message("I'm not in a voice channel. Use `/join` first.", ephemeral=True)
+        await not_in_voice(interaction)
         return
-    await interaction.response.send_message(f"Saying: *{text}*")
+    await safe_send(interaction, f"Saying: *{text}*")
+
     def _generate():
         return eleven.text_to_speech.convert(
             voice_id=config["VOICE_ID"],
             model_id="eleven_multilingual_v2",
             text=text
         )
+
     try:
         if vc.is_playing():
             vc.stop()

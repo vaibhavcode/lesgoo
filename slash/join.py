@@ -1,9 +1,10 @@
 import discord
+from utils.errors import safe_send, user_not_in_voice
 
 
 async def _join(interaction: discord.Interaction):
     if interaction.user.voice is None:
-        await interaction.response.send_message("Join a voice channel first.", ephemeral=True)
+        await user_not_in_voice(interaction)
         return
     channel = interaction.user.voice.channel
     vc = interaction.guild.voice_client
@@ -11,7 +12,7 @@ async def _join(interaction: discord.Interaction):
         await vc.move_to(channel)
     else:
         await channel.connect()
-    await interaction.response.send_message(f"Joined **{channel.name}**.")
+    await safe_send(interaction, f"Joined **{channel.name}**.")
 
 
 def setup(bot, guild):

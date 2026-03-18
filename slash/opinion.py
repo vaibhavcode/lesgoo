@@ -1,14 +1,16 @@
 import discord
 import asyncio
+from discord import app_commands
 from groq import Groq
 from utils.config import config
-from discord import app_commands
+from utils.errors import safe_send
 
 groq_client = Groq(api_key=config["GROQ_API_KEY"])
 
 
 async def _opinion(interaction: discord.Interaction, topic: str):
     await interaction.response.defer()
+
     def _call():
         return groq_client.chat.completions.create(
             model="llama-3.3-70b-versatile", max_tokens=100,
@@ -17,6 +19,7 @@ async def _opinion(interaction: discord.Interaction, topic: str):
                 {"role": "user", "content": f"Give your opinion on: {topic}"}
             ]
         )
+
     try:
         completion = await asyncio.to_thread(_call)
         response = completion.choices[0].message.content.strip()

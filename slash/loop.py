@@ -5,11 +5,9 @@ from utils.errors import safe_send
 
 async def _loop(interaction: discord.Interaction):
     mq = get_queue(interaction.guild.id)
-
     if mq.current is None:
-        await safe_send(interaction, "Nothing is playing to loop.", ephemeral=True)
+        await safe_send(interaction, "Nothing is playing to loop.")
         return
-
     mq.loop = not mq.loop
     state = "ON" if mq.loop else "OFF"
     await safe_send(interaction, f"Loop is now **{state}**.")

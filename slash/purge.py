@@ -1,14 +1,15 @@
 import discord
 from discord import app_commands
 from utils.roles import is_mod
+from utils.errors import safe_send
 
 
 async def _purge(interaction: discord.Interaction, amount: int):
     if not is_mod(interaction.user):
-        await interaction.response.send_message("You don't have permission to purge messages.", ephemeral=True)
+        await safe_send(interaction, "You don't have permission to purge messages.", ephemeral=True)
         return
     if not 1 <= amount <= 100:
-        await interaction.response.send_message("Amount must be between 1 and 100.", ephemeral=True)
+        await safe_send(interaction, "Amount must be between 1 and 100.", ephemeral=True)
         return
     await interaction.response.defer(ephemeral=True)
     deleted = await interaction.channel.purge(limit=amount)

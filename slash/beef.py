@@ -1,20 +1,22 @@
 import discord
 import asyncio
+from discord import app_commands
 from groq import Groq
 from utils.memory import get_user_memory
 from utils.config import config
-from discord import app_commands
+from utils.errors import safe_send
 
 groq_client = Groq(api_key=config["GROQ_API_KEY"])
 
 
 async def _beef(interaction: discord.Interaction, user: discord.Member):
     if user == interaction.client.user:
-        await interaction.response.send_message("Start beef with *myself*? I am the standard.", ephemeral=True)
+        await safe_send(interaction, "Start beef with *myself*? I am the standard everyone else fails to meet.")
         return
     await interaction.response.defer()
     user_mem = get_user_memory(user.id)
     notes = "\n".join(user_mem["persona_notes"]) or "No prior knowledge."
+
     def _call():
         return groq_client.chat.completions.create(
             model="llama-3.3-70b-versatile", max_tokens=120,
@@ -23,6 +25,7 @@ async def _beef(interaction: discord.Interaction, user: discord.Member):
                 {"role": "user", "content": f"Call out {user.display_name}.\nKnown traits:\n{notes}"}
             ]
         )
+
     try:
         completion = await asyncio.to_thread(_call)
         callout = completion.choices[0].message.content.strip()

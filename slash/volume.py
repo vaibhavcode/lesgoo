@@ -8,20 +8,14 @@ async def _volume(interaction: discord.Interaction, level: int):
     if not 0 <= level <= 100:
         await safe_send(interaction, "Volume must be between 0 and 100.", ephemeral=True)
         return
-
     vc = interaction.guild.voice_client
-
     if vc is None or not vc.is_connected():
         await not_in_voice(interaction)
         return
-
     mq = get_queue(interaction.guild.id)
     mq.volume = level / 100.0
-
-    # Apply immediately if something is playing
     if vc.source and isinstance(vc.source, discord.PCMVolumeTransformer):
         vc.source.volume = mq.volume
-
     await safe_send(interaction, f"Volume set to **{level}%**.")
 
 

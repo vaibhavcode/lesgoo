@@ -1,25 +1,23 @@
 import discord
 from discord import app_commands
 from utils.roles import is_mod
+from utils.errors import safe_send
 
 
 async def _unban(interaction: discord.Interaction, user_id: str):
     if not is_mod(interaction.user):
-        await interaction.response.send_message("You don't have permission to unban users.", ephemeral=True)
+        await safe_send(interaction, "You don't have permission to unban users.", ephemeral=True)
         return
     try:
         user = await interaction.client.fetch_user(int(user_id))
         await interaction.guild.unban(user)
-        embed = discord.Embed(title="User unbanned", color=discord.Color.green())
-        embed.add_field(name="User", value=f"{user.name}", inline=True)
-        embed.add_field(name="Mod", value=interaction.user.mention, inline=True)
-        await interaction.response.send_message(embed=embed)
+        await safe_send(interaction, f"**{user.name}** unbanned.")
     except discord.NotFound:
-        await interaction.response.send_message("That user ID wasn't found or isn't banned.", ephemeral=True)
+        await safe_send(interaction, "That user ID wasn't found or isn't banned.", ephemeral=True)
     except discord.Forbidden:
-        await interaction.response.send_message("I don't have permission to unban users.", ephemeral=True)
+        await safe_send(interaction, "I don't have permission to unban users.", ephemeral=True)
     except ValueError:
-        await interaction.response.send_message("Invalid user ID. Must be a number.", ephemeral=True)
+        await safe_send(interaction, "Invalid user ID. Must be a number.", ephemeral=True)
 
 
 def setup(bot, guild):
